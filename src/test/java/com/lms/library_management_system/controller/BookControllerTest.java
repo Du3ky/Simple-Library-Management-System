@@ -75,9 +75,11 @@ public class BookControllerTest {
 
         ResponseEntity<BookDto> response = bookController.addBook(createDto);
 
-        assertEquals(201, response.getStatusCodeValue());
+        assertEquals(201, response.getStatusCode().value());
         assertEquals("New Book", response.getBody().getTitle());
         assertEquals("Author", response.getBody().getAuthor());
+        assertEquals("1234567654321", response.getBody().getIsbn());
+        assertEquals(2025, response.getBody().getPublishedYear());
     }
 
     //getBookById test
@@ -148,14 +150,12 @@ public class BookControllerTest {
     }
 
     @Test
-    void shouldReturnNotFoundWhenDeletingNonexistentBook() {
+    void shouldThrowBookNotFoundExceptionWhenDeletingNonexistentBook() {
         Long bookId = 999L;
 
         doThrow(new BookNotFoundException(bookId)).when(bookService).deleteBook(bookId);
 
-        ResponseEntity<Void> response = bookController.deleteBook(bookId);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertThrows(BookNotFoundException.class, () -> bookController.deleteBook(bookId));
     }
 
     //getCopiesByBookId test
@@ -177,15 +177,13 @@ public class BookControllerTest {
     }
 
     @Test
-    void shouldReturnNotFoundWhenGettingCopiesForNonexistentBook() {
+    void shouldThrowBookNotFoundExceptionWhenGettingCopiesForNonexistentBook() {
         Long bookId = 999L;
 
         when(bookService.getCopiesByBookId(bookId))
                 .thenThrow(new BookNotFoundException(bookId));
 
-        ResponseEntity<List<BookCopyDto>> response = bookController.getCopiesByBookId(bookId);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertThrows(BookNotFoundException.class, () -> bookController.getCopiesByBookId(bookId));
     }
 
     //addCopyToBook test
@@ -205,15 +203,13 @@ public class BookControllerTest {
     }
 
     @Test
-    void shouldReturnNotFoundWhenAddingCopyToNonexistentBook() {
+    void shouldThrowBookNotFoundExceptionWhenAddingCopyToNonexistentBook() {
         Long bookId = 999L;
 
         when(bookService.addCopyToBook(bookId))
                 .thenThrow(new BookNotFoundException(bookId));
 
-        ResponseEntity<BookCopyDto> response = bookController.addCopyToBook(bookId);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertThrows(BookNotFoundException.class, () -> bookController.addCopyToBook(bookId));
     }
 
     //updateCopyAvailability test
@@ -238,7 +234,7 @@ public class BookControllerTest {
     }
 
     @Test
-    void shouldReturnNotFoundIfCopyDoesNotExist() {
+    void shouldThrowCopyNotFoundExceptionIfCopyDoesNotExist() {
         Long bookId = 1L;
         Long copyId = 999L;
         BookCopyUpdateDto dto = new BookCopyUpdateDto(false);
@@ -246,14 +242,13 @@ public class BookControllerTest {
         when(bookService.updateCopyAvailability(bookId, copyId, dto))
                 .thenThrow(new CopyNotFoundException(copyId));
 
-        ResponseEntity<BookCopyDto> response =
-                bookController.updateCopyAvailability(bookId, copyId, dto);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertThrows(CopyNotFoundException.class, () ->
+                bookController.updateCopyAvailability(bookId, copyId, dto)
+        );
     }
 
     @Test
-    void shouldReturnBadRequestIfCopyMismatch() {
+    void shouldThrowIllegalArgumentExceptionIfCopyMismatch() {
         Long bookId = 1L;
         Long copyId = 2L;
         BookCopyUpdateDto dto = new BookCopyUpdateDto(true);
@@ -261,10 +256,9 @@ public class BookControllerTest {
         when(bookService.updateCopyAvailability(bookId, copyId, dto))
                 .thenThrow(new IllegalArgumentException("Mismatch"));
 
-        ResponseEntity<BookCopyDto> response =
-                bookController.updateCopyAvailability(bookId, copyId, dto);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertThrows(IllegalArgumentException.class, () ->
+                bookController.updateCopyAvailability(bookId, copyId, dto)
+        );
     }
 
 }

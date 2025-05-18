@@ -38,57 +38,37 @@ public class BookController {
     //Endpoint 3
     @GetMapping("/{id}")
     public ResponseEntity<BookDetailsDto> getBookById(@PathVariable Long id) {
-        try {
-            BookDetailsDto book = bookService.getBookById(id);
-            return ResponseEntity.ok(book);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        BookDetailsDto book = bookService.getBookById(id);
+        return ResponseEntity.ok(book);
     }
 
     //Endpoint 4
     @PutMapping("/{id}")
     public ResponseEntity<BookDto> updateBook(@PathVariable Long id,
                                               @Valid @RequestBody BookUpdateDto dto) {
-        try {
-            BookDto updated = bookService.updateBook(id, dto);
-            return ResponseEntity.ok(updated);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        BookDto updated = bookService.updateBook(id, dto);
+        return ResponseEntity.ok(updated);
     }
 
     //Endpoint 5
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
-        try {
-            bookService.deleteBook(id);
-            return ResponseEntity.noContent().build();
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        bookService.deleteBook(id);
+        return ResponseEntity.noContent().build();
     }
 
     //Endpoint 6
     @GetMapping("/{id}/copies")
     public ResponseEntity<List<BookCopyDto>> getCopiesByBookId(@PathVariable Long id) {
-        try {
-            List<BookCopyDto> copies = bookService.getCopiesByBookId(id);
-            return ResponseEntity.ok(copies);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        List<BookCopyDto> copies = bookService.getCopiesByBookId(id);
+        return ResponseEntity.ok(copies);
     }
 
     //Endpoint 7
     @PostMapping("/{id}/copies")
     public ResponseEntity<BookCopyDto> addCopyToBook(@PathVariable Long id) {
-        try {
-            BookCopyDto created = bookService.addCopyToBook(id);
-            return ResponseEntity.status(HttpStatus.CREATED).body(created);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        BookCopyDto created = bookService.addCopyToBook(id);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     //Endpoint 8
@@ -98,14 +78,8 @@ public class BookController {
             @PathVariable Long copyId,
             @Valid @RequestBody BookCopyUpdateDto dto
     ) {
-        try {
-            BookCopyDto updated = bookService.updateCopyAvailability(id, copyId, dto);
-            return ResponseEntity.ok(updated);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        BookCopyDto updated = bookService.updateCopyAvailability(id, copyId, dto);
+        return ResponseEntity.ok(updated);
     }
 
 }

@@ -103,9 +103,7 @@ public class BookServiceImplTest {
 
         when(bookRepository.existsByIsbn(dto.getIsbn())).thenReturn(true);
 
-        assertThrows(DuplicateBookException.class, () -> {
-            bookService.createBook(dto);
-        });
+        assertThrows(DuplicateBookException.class, () -> bookService.createBook(dto));
     }
 
     //getBookById test
@@ -133,9 +131,7 @@ public class BookServiceImplTest {
     void shouldThrowBookNotFoundExceptionWhenBookDoesNotExist() {
         when(bookRepository.findById(999L)).thenReturn(Optional.empty());
 
-        assertThrows(BookNotFoundException.class, () -> {
-            bookService.getBookById(999L);
-        });
+        assertThrows(BookNotFoundException.class, () -> bookService.getBookById(999L));
     }
 
     //updateBook test
@@ -176,9 +172,7 @@ public class BookServiceImplTest {
 
         when(bookRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
-        assertThrows(BookNotFoundException.class, () -> {
-            bookService.updateBook(nonExistentId, dto);
-        });
+        assertThrows(BookNotFoundException.class, () -> bookService.updateBook(nonExistentId, dto));
     }
 
     //deleteBook test
@@ -207,9 +201,7 @@ public class BookServiceImplTest {
 
         when(bookRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
-        assertThrows(BookNotFoundException.class, () -> {
-            bookService.deleteBook(nonExistentId);
-        });
+        assertThrows(BookNotFoundException.class, () -> bookService.deleteBook(nonExistentId));
     }
 
     //getCopiesByBookId test
@@ -242,9 +234,7 @@ public class BookServiceImplTest {
         Long nonExistentBookId = 999L;
         when(bookRepository.existsById(nonExistentBookId)).thenReturn(false);
 
-        assertThrows(BookNotFoundException.class, () -> {
-            bookService.getCopiesByBookId(nonExistentBookId);
-        });
+        assertThrows(BookNotFoundException.class, () -> bookService.getCopiesByBookId(nonExistentBookId));
     }
 
     //addCopyToBook test
@@ -279,9 +269,7 @@ public class BookServiceImplTest {
         Long invalidBookId = 999L;
         when(bookRepository.findById(invalidBookId)).thenReturn(Optional.empty());
 
-        assertThrows(BookNotFoundException.class, () -> {
-            bookService.addCopyToBook(invalidBookId);
-        });
+        assertThrows(BookNotFoundException.class, () -> bookService.addCopyToBook(invalidBookId));
     }
 
     //updateCopyAvailability test
@@ -330,9 +318,7 @@ public class BookServiceImplTest {
         BookCopyUpdateDto dto = new BookCopyUpdateDto();
         dto.setAvailable(false);
 
-        assertThrows(CopyNotFoundException.class, () -> {
-            bookService.updateCopyAvailability(bookId, copyId, dto);
-        });
+        assertThrows(CopyNotFoundException.class, () -> bookService.updateCopyAvailability(bookId, copyId, dto));
     }
 
     @Test
@@ -358,9 +344,7 @@ public class BookServiceImplTest {
 
         when(bookCopyRepository.findById(copyId)).thenReturn(Optional.of(copy));
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            bookService.updateCopyAvailability(requestedBookId, copyId, dto);
-        });
+        assertThrows(IllegalArgumentException.class, () -> bookService.updateCopyAvailability(requestedBookId, copyId, dto));
     }
 
 }
