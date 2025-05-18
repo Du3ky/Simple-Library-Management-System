@@ -3,10 +3,13 @@ package com.lms.library_management_system.service.impl;
 import com.lms.library_management_system.dto.*;
 import com.lms.library_management_system.entity.Book;
 import com.lms.library_management_system.entity.BookCopy;
+import com.lms.library_management_system.exception.BookCopyMismatchException;
+import com.lms.library_management_system.exception.BookNotFoundException;
+import com.lms.library_management_system.exception.CopyNotFoundException;
+import com.lms.library_management_system.exception.DuplicateBookException;
 import com.lms.library_management_system.repository.BookCopyRepository;
 import com.lms.library_management_system.repository.BookRepository;
 import com.lms.library_management_system.service.BookService;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +38,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public BookDto createBook(BookCreateDto dto) {
         if (bookRepository.existsByIsbn(dto.getIsbn()) || bookRepository.existsByTitle(dto.getTitle())) {
-            throw new IllegalArgumentException("Book with same title or ISBN already exists.");
+            throw new DuplicateBookException("Book with same title or ISBN already exists.");
         }
 
         Book book = Book.builder()
@@ -51,26 +54,15 @@ public class BookServiceImpl implements BookService {
     @Override
     public BookDetailsDto getBookById(Long id) {
         Book book = bookRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Book not found"));
+                .orElseThrow(() -> new BookNotFoundException(id));
 
-        List<BookCopyDto> copies = book.getCopies().stream()
-                .map(copy -> new BookCopyDto(copy.getId(), copy.getAvailable()))
-                .collect(Collectors.toList());
-
-        return BookDetailsDto.builder()
-                .id(book.getId())
-                .title(book.getTitle())
-                .author(book.getAuthor())
-                .isbn(book.getIsbn())
-                .publishedYear(book.getPublishedYear())
-                .copies(copies)
-                .build();
+        return mapToBookDetailsDto(book);
     }
 
     @Override
     public BookDto updateBook(Long id, BookUpdateDto dto) {
         Book book = bookRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Book not found"));
+                .orElseThrow(() -> new BookNotFoundException(id));
 
         if (dto.getTitle() != null && !dto.getTitle().isBlank()) {
             book.setTitle(dto.getTitle());
@@ -86,14 +78,14 @@ public class BookServiceImpl implements BookService {
     @Override
     public void deleteBook(Long id) {
         Book book = bookRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Book not found"));
+                .orElseThrow(() -> new BookNotFoundException(id));
         bookRepository.delete(book);
     }
 
     @Override
     public List<BookCopyDto> getCopiesByBookId(Long id) {
         if (!bookRepository.existsById(id)) {
-            throw new EntityNotFoundException("Book not found");
+            throw new BookNotFoundException(id);
         }
 
         return bookCopyRepository.findByBookId(id).stream()
@@ -104,7 +96,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public BookCopyDto addCopyToBook(Long bookId) {
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new EntityNotFoundException("Book not found"));
+                .orElseThrow(() -> new BookNotFoundException(bookId));
 
         BookCopy copy = new BookCopy();
         copy.setBook(book);
@@ -118,10 +110,10 @@ public class BookServiceImpl implements BookService {
     @Override
     public BookCopyDto updateCopyAvailability(Long bookId, Long copyId, BookCopyUpdateDto dto) {
         BookCopy copy = bookCopyRepository.findById(copyId)
-                .orElseThrow(() -> new EntityNotFoundException("Copy not found"));
+                .orElseThrow(() -> new CopyNotFoundException(copyId));
 
         if (!copy.getBook().getId().equals(bookId)) {
-            throw new IllegalArgumentException("This copy does not belong to the specified book.");
+            throw new BookCopyMismatchException();
         }
 
         copy.setAvailable(dto.getAvailable());
@@ -138,4 +130,20 @@ public class BookServiceImpl implements BookService {
                 .publishedYear(book.getPublishedYear())
                 .build();
     }
+
+    private BookDetailsDto mapToBookDetailsDto(Book book) {
+        List<BookCopyDto> copies = book.getCopies().stream()
+                .map(copy -> new BookCopyDto(copy.getId(), copy.getAvailable()))
+                .collect(Collectors.toList());
+
+        return BookDetailsDto.builder()
+                .id(book.getId())
+                .title(book.getTitle())
+                .author(book.getAuthor())
+                .isbn(book.getIsbn())
+                .publishedYear(book.getPublishedYear())
+                .copies(copies)
+                .build();
+    }
+
 }
