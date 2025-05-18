@@ -70,6 +70,14 @@ public class BookServiceImpl implements BookService {
             book.setTitle(dto.getTitle());
         }
 
+        if (dto.getAuthor() != null && !dto.getAuthor().isBlank()) {
+            book.setAuthor(dto.getAuthor());
+        }
+
+        if (dto.getIsbn() != null && !dto.getIsbn().isBlank()) {
+            book.setIsbn(dto.getIsbn());
+        }
+
         if (dto.getPublishedYear() != null) {
             book.setPublishedYear(dto.getPublishedYear());
         }
