@@ -2,7 +2,6 @@ package com.lms.library_management_system.controller;
 
 import com.lms.library_management_system.dto.*;
 import com.lms.library_management_system.service.BookService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
