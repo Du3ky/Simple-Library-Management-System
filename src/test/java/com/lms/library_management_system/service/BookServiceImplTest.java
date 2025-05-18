@@ -3,18 +3,22 @@ package com.lms.library_management_system.service;
 import com.lms.library_management_system.dto.*;
 import com.lms.library_management_system.entity.Book;
 import com.lms.library_management_system.entity.BookCopy;
+import com.lms.library_management_system.exception.BookCopyMismatchException;
 import com.lms.library_management_system.exception.BookNotFoundException;
 import com.lms.library_management_system.exception.CopyNotFoundException;
 import com.lms.library_management_system.exception.DuplicateBookException;
-import com.lms.library_management_system.repository.BookRepository;
 import com.lms.library_management_system.repository.BookCopyRepository;
+import com.lms.library_management_system.repository.BookRepository;
 import com.lms.library_management_system.service.impl.BookServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
-import java.util.Arrays;
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -51,13 +55,16 @@ public class BookServiceImplTest {
                 .publishedYear(2008)
                 .build();
 
-        when(bookRepository.findAll()).thenReturn(Arrays.asList(book1, book2));
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Book> page = new PageImpl<>(List.of(book1, book2), pageable, 2);
 
-        List<BookDto> result = bookService.getAllBooks();
+        when(bookRepository.findAll(pageable)).thenReturn(page);
 
-        assertEquals(2, result.size());
-        assertEquals("Effective Java", result.get(0).getTitle());
-        assertEquals("Clean Code", result.get(1).getTitle());
+        Page<BookDto> result = bookService.getAllBooks(pageable);
+
+        assertEquals(2, result.getTotalElements());
+        assertEquals("Effective Java", result.getContent().get(0).getTitle());
+        assertEquals("Clean Code", result.getContent().get(1).getTitle());
     }
 
     //createBook test
@@ -344,7 +351,7 @@ public class BookServiceImplTest {
 
         when(bookCopyRepository.findById(copyId)).thenReturn(Optional.of(copy));
 
-        assertThrows(IllegalArgumentException.class, () -> bookService.updateCopyAvailability(requestedBookId, copyId, dto));
+        assertThrows(BookCopyMismatchException.class, () -> bookService.updateCopyAvailability(requestedBookId, copyId, dto));
     }
 
 }

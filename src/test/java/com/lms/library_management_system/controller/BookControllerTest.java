@@ -6,6 +6,10 @@ import com.lms.library_management_system.exception.CopyNotFoundException;
 import com.lms.library_management_system.service.BookService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -44,13 +48,17 @@ public class BookControllerTest {
                 .publishedYear(2010)
                 .build();
 
-        when(bookService.getAllBooks()).thenReturn(List.of(book1, book2));
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<BookDto> page = new PageImpl<>(List.of(book1, book2), pageable, 2);
 
-        List<BookDto> result = bookController.getAllBooks();
+        when(bookService.getAllBooks(pageable)).thenReturn(page);
 
-        assertEquals(2, result.size());
-        assertEquals("Book One", result.get(0).getTitle());
-        assertEquals("Book Two", result.get(1).getTitle());
+        ResponseEntity<Page<BookDto>> response = bookController.getAllBooks(0, 10);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(2, response.getBody().getTotalElements());
+        assertEquals("Book One", response.getBody().getContent().get(0).getTitle());
+        assertEquals("Book Two", response.getBody().getContent().get(1).getTitle());
     }
 
     //addBook test

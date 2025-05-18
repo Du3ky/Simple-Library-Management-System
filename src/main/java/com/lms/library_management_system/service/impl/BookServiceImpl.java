@@ -11,6 +11,8 @@ import com.lms.library_management_system.repository.BookCopyRepository;
 import com.lms.library_management_system.repository.BookRepository;
 import com.lms.library_management_system.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,11 +31,11 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<BookDto> getAllBooks() {
-        return bookRepository.findAll().stream()
-                .map(this::mapToBookDto)
-                .collect(Collectors.toList());
+    public Page<BookDto> getAllBooks(Pageable pageable) {
+        return bookRepository.findAll(pageable)
+                .map(this::mapToBookDto);
     }
+
 
     @Override
     public BookDto createBook(BookCreateDto dto) {

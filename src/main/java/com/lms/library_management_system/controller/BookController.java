@@ -4,6 +4,8 @@ import com.lms.library_management_system.dto.*;
 import com.lms.library_management_system.service.BookService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,9 +25,14 @@ public class BookController {
 
     //Endpoint 1
     @GetMapping
-    public List<BookDto> getAllBooks() {
-        return bookService.getAllBooks();
+    public ResponseEntity<Page<BookDto>> getAllBooks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<BookDto> books = bookService.getAllBooks(PageRequest.of(page, size));
+        return ResponseEntity.ok(books);
     }
+
 
     //Endpoint 2
     @PostMapping
